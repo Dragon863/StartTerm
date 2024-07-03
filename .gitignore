@@ -1,5 +1,7 @@
-assets/macos.jpg
+assets/
 # Copyright (probably)
 
 .env
 # Contains API keys
+
+starterm/__pycache__/*

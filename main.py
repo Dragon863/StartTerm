@@ -1,6 +1,7 @@
 import datetime
 import os
 import socket
+import time
 import dotenv
 
 import requests
@@ -38,10 +39,14 @@ def drawText(data: list, text: str, row: int):
 
 
 def drawDash():
-    data: list = image.renderImageAsBg("assets/macos.jpg")
+    data: list = image.renderImageAsBg(
+        "assets/tumblr_inline_o29dtaXWxz1rtb73a_1280.jpg"
+    )
     time = str(datetime.datetime.now().strftime("%H:%M"))
     drawText(data, time, 1)
     drawText(data, getIp(), 3)
+    weather = get_weather(dotenv.get_key(".env", "CITY"))
+    drawText(data, weather, 5)
 
     for row in data:
         for pixel in row:
@@ -50,4 +55,6 @@ def drawDash():
 
 
 if __name__ == "__main__":
-    drawDash()
+    while True:
+        drawDash()
+        time.sleep(20)

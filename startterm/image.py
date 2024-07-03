@@ -69,6 +69,6 @@ def renderImage(path: str, size: tuple) -> list:
 
 def renderImageAsBg(path) -> list:
     termSize = os.get_terminal_size()
-    size = (math.floor(termSize.columns / 2), termSize.lines)
+    size = (math.floor(termSize.columns / 2), termSize.lines - 1)
     rgbaList = convertPngToRGBAList(path, size)
     return rgbaList
