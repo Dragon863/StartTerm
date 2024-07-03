@@ -1,2 +1,5 @@
 assets/macos.jpg
 # Copyright (probably)
+
+.env
+# Contains API keys
