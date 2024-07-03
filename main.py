@@ -3,6 +3,9 @@ import os
 import socket
 import time
 import dotenv
+import sys
+import select
+
 
 import requests
 from startterm import image
@@ -39,9 +42,7 @@ def drawText(data: list, text: str, row: int):
 
 
 def drawDash():
-    data: list = image.renderImageAsBg(
-        "assets/tumblr_inline_o29dtaXWxz1rtb73a_1280.jpg"
-    )
+    data: list = image.renderImageAsBg("assets/macos.jpg")
     time = str(datetime.datetime.now().strftime("%H:%M"))
     drawText(data, time, 1)
     drawText(data, getIp(), 3)
@@ -55,6 +56,11 @@ def drawDash():
 
 
 if __name__ == "__main__":
-    while True:
-        drawDash()
-        time.sleep(20)
+    try:
+        while True:
+            drawDash()
+            if sys.stdin in select.select([sys.stdin], [], [], 20)[0]:
+                input()
+                break
+    finally:
+        os.system("cls" if os.name == "nt" else "clear")
