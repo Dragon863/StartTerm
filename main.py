@@ -1,7 +1,8 @@
 import datetime
+import json
 import os
 import socket
-import time
+import psutil
 import dotenv
 import sys
 import select
@@ -10,7 +11,7 @@ import select
 import requests
 from startterm import image
 
-os.system("cls")
+os.system("cls" if os.name == "nt" else "clear")
 dotenv.load_dotenv(".env")
 
 
@@ -22,7 +23,7 @@ def getIp() -> str:
     return host
 
 
-def get_weather(city):
+def getWeather(city):
     api_key = dotenv.get_key(".env", "OWM_KEY")
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     response = requests.get(url)
@@ -30,24 +31,51 @@ def get_weather(city):
     return f"{data['main']['temp']}°C, {data['weather'][0]['description']}"
 
 
-def drawText(data: list, text: str, row: int):
+def drawTextEnd(data: list, text: str, row: int):
     position = len(data[row]) - 1 - (len([*text]))
-    print(os.get_terminal_size().columns)
-    print(position)
-
-    print()
     for char in [*text]:
         data[row][position] = char + " "
         position += 1
 
 
+def drawTextCenter(data: list, text: str, row: int):
+    width = len(data[row])
+    start = (width - len(text)) // 2
+    for i, char in enumerate(text):
+        data[row][start + i] = f"\033[1m{char}\033[0m "
+
+
+def dynamic_greeting() -> str:
+    now = datetime.datetime.now()
+
+    if 5 <= now.hour < 12:
+        greeting = "Good Morning!"
+    elif 12 <= now.hour < 18:
+        greeting = "Good Afternoon!"
+    else:
+        greeting = "Good Evening!"
+
+    return greeting
+
+
+def getBatteryStatus():
+    battery = psutil.sensors_battery()
+    percent = round(battery.percent) if battery else "N/A"
+    return f"Battery: {percent}%"
+
+
 def drawDash():
-    data: list = image.renderImageAsBg("assets/macos.jpg")
+    os.system("cls" if os.name == "nt" else "clear")
+    data: list = image.renderImageAsBg(
+        dotenv.get_key(".env", "IMAGE"),
+    )
     time = str(datetime.datetime.now().strftime("%H:%M"))
-    drawText(data, time, 1)
-    drawText(data, getIp(), 3)
-    weather = get_weather(dotenv.get_key(".env", "CITY"))
-    drawText(data, weather, 5)
+    weather = getWeather(dotenv.get_key(".env", "CITY"))
+    drawTextEnd(data, time, 1)
+    drawTextEnd(data, getIp(), 3)
+    drawTextEnd(data, getBatteryStatus(), 5)
+    drawTextEnd(data, weather, 7)
+    drawTextCenter(data, dynamic_greeting(), round(0.5 * len(data)))
 
     for row in data:
         for pixel in row:
@@ -55,12 +83,21 @@ def drawDash():
         print()
 
 
+with open("shortcuts.json", "r") as f:
+    # User-definable presets for commands that could be run :)
+    # (example included)
+    commands = json.load(f)
+
 if __name__ == "__main__":
     try:
         while True:
             drawDash()
             if sys.stdin in select.select([sys.stdin], [], [], 20)[0]:
-                input()
-                break
+                user_input = input().strip()
+                if user_input in commands:
+                    os.system("cls" if os.name == "nt" else "clear")
+                    os.system(commands[user_input])
+                elif user_input == "exit" or user_input == "":
+                    break
     finally:
         os.system("cls" if os.name == "nt" else "clear")

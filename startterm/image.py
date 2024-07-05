@@ -1,3 +1,7 @@
+import math
+import os
+from PIL import Image
+
 CHAR = "█"
 
 
@@ -25,11 +29,6 @@ class RGBA:
         # Finally, \033[0m resets the colour to default
 
         return f"\033[38;2;{r};{g};{b}m{CHAR*2}\033[0m"
-
-
-import math
-import os
-from PIL import Image
 
 
 def resizeImage(image_path, size):

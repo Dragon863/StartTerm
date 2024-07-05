@@ -5,3 +5,4 @@ assets/
 # Contains API keys
 
 starterm/__pycache__/*
+*.pyc
